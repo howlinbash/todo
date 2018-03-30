@@ -6,7 +6,7 @@ map <Leader>todo :vsp ~/.todo/todo.md<CR>|        " Open todo list in vsplit
 map <Leader>htodo :sp ~/.todo/todo.md<CR>|        " Open todo list in split
 map <Leader>id :r! date +\%Y\%m\%d\%H\%M\%S<CR>kJA<space><space>|     " create ID
 map <leader>vv :call ViewTodo('v')<CR>|          " Open todo in vsplit
-map <leader>vh :call ViewTodo()<CR>|          " Open todo in split
+map <leader>vh :call ViewTodo('')<CR>|          " Open todo in split
 map <leader>vd :silent call CompleteTodo()<CR>|   " Complete Todo
 
 
@@ -44,14 +44,18 @@ function! ViewTodo(axis)
     let todo_path = s:home . todo_id
 
     " Create Todo if one does not yet exist
-    if todo_string[21] != '*'
-        call cursor('.', 22)
-        exec "normal! r*0"
-        let todo_label = StringToList(getline('.'))[3]
+    if todo_string[21] == '*'
         exec ':'.a:axis.'sp ' . todo_path
-        call NewTodo(todo_label)
     else
-        exec ':'.a:axis.'sp ' . todo_path
+        try
+            call cursor('.', 22)
+            exec "normal! r*0"
+            let todo_label = StringToList(getline('.'))[3]
+            exec ':'.a:axis.'sp ' . todo_path
+            call NewTodo(todo_label)
+        catch
+            echo 'ERROR: no todo found to view!'
+        endtry
     endif
 endfunction
 
