@@ -9,34 +9,37 @@ map <leader>vv :call ViewTodo(1, 1)<CR>|          " Open new todo in vsplit
 map <leader>vh :call ViewTodo(0, 1)<CR>|          " Open new todo in split
 map <leader>va :call ViewTodo(1, 0)<CR>|          " Open todo in vsplit
 map <leader>vah :call ViewTodo(0, 0)<CR>|         " Open todo in split
-map <leader>done :call Done()<cr>|                " File todo as completed
+map <leader>vd :silent call CompleteTodo()<CR>|   " Complete Todo
+
+
+"" Globals
+
+let s:home = '/home/howlin/.todo/'
+let s:done_file = 'done/done.md'
+
 
 "" Todo Functions
 
+" Remove whitespace from string
 function! Strip(input_string)
     return substitute(a:input_string, '^\s*\(.\{-}\)\s*$', '\1', '')
 endfunction
 
-function! Done()
-    let oldname = expand('%:p')
-    let newname = expand('%:h').'/done/'.expand('%:t')
-    exec "saveas " . newname 
-    call delete(oldname) 
-    exec ":q"
-endfunction
-
+" Take an indefinite amount of whitespace as list delimiter
 function! StringToList(input_string)
     let list = split(a:input_string, '  ')
     let stripped_list = map(list, 'Strip(v:val)')
     return filter(stripped_list, 'v:val != ""')
 endfunction
 
+" Create new Todo with title from TodoLi
 function! NewTodo(title)
     call append(0, '# ' . a:title)
     call append(1, '')
     exec ':startinsert'
 endfunction
 
+" Open or create Todo in vertical or horizontal split
 function! ViewTodo(vsplit, create_todo)
     let todo = StringToList(getline('.'))
     let path = '~/.todo/' . todo[0]
@@ -47,5 +50,37 @@ function! ViewTodo(vsplit, create_todo)
     endif
     if a:create_todo
         call NewTodo(todo[1])
+    endif
+endfunction
+
+" Move Todo from root to archive dir
+function! ArchiveTodo(todo_id)
+    let todo_path = s:home.a:todo_id
+    let archive_path = s:home.'done/'.a:todo_id
+    exec "silent !"."mv "todo_path." ".archive_path
+endfunction
+
+" Move TodoLi from Index to archive index
+function! ArchiveTodoLi(todo_id)
+    call search(a:todo_id)
+    let todo_li = getline('.')
+    let timestamp = systemlist('date +\%Y\%m\%d\%H\%M\%S')[0]
+    let done_li = timestamp.'  '.todo_li
+    let done_path = s:home.s:done_file
+    exec line('.') 'delete _'
+    exec writefile([done_li], done_path, "a")
+endfunction
+
+" Archive Todo and TodoLi from Index or Todo
+function! CompleteTodo()
+    if expand('%:t') == 'todo.md'
+        let todo_id = StringToList(getline('.'))[0]
+        call ArchiveTodo(todo_id)
+        call ArchiveTodoLi(todo_id)
+    else
+        let todo_id = expand('%:t')
+        call ArchiveTodo(todo_id)
+        exec ":q"
+        call ArchiveTodoLi(todo_id)
     endif
 endfunction
