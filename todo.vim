@@ -5,10 +5,8 @@
 map <Leader>todo :vsp ~/.todo/todo.md<CR>|        " Open todo list in vsplit
 map <Leader>htodo :sp ~/.todo/todo.md<CR>|        " Open todo list in split
 map <Leader>id :r! date +\%Y\%m\%d\%H\%M\%S<CR>kJA<space><space>|     " create ID
-map <leader>vv :call ViewTodo(1, 1)<CR>|          " Open new todo in vsplit
-map <leader>vh :call ViewTodo(0, 1)<CR>|          " Open new todo in split
-map <leader>va :call ViewTodo(1, 0)<CR>|          " Open todo in vsplit
-map <leader>vah :call ViewTodo(0, 0)<CR>|         " Open todo in split
+map <leader>vv :call ViewTodo('v')<CR>|          " Open todo in vsplit
+map <leader>vh :call ViewTodo()<CR>|          " Open todo in split
 map <leader>vd :silent call CompleteTodo()<CR>|   " Complete Todo
 
 
@@ -40,16 +38,20 @@ function! NewTodo(title)
 endfunction
 
 " Open or create Todo in vertical or horizontal split
-function! ViewTodo(vsplit, create_todo)
-    let todo = StringToList(getline('.'))
-    let path = '~/.todo/' . todo[0]
-    if a:vsplit
-        exec ':vsp ' . path
+function! ViewTodo(axis)
+    let todo_string = getline('.')
+    let todo_id = StringToList(todo_string)[0]
+    let todo_path = s:home . todo_id
+
+    " Create Todo if one does not yet exist
+    if todo_string[21] != '*'
+        call cursor('.', 22)
+        exec "normal! r*0"
+        let todo_label = StringToList(getline('.'))[3]
+        exec ':'.a:axis.'sp ' . todo_path
+        call NewTodo(todo_label)
     else
-        exec ':sp ' . path
-    endif
-    if a:create_todo
-        call NewTodo(todo[1])
+        exec ':'.a:axis.'sp ' . todo_path
     endif
 endfunction
 
