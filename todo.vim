@@ -2,7 +2,7 @@
 
 "" Globals
 
-let s:home = '/home/howlin/.todo/'
+let s:root = '/home/howlin/.todo/'
 let s:index = 'todo.md'
 let s:done_file = 'done/done.md'
 
@@ -61,7 +61,7 @@ endfunction
 function! ViewTodo()
     let todo_string = getline('.')
     let todo_id = StringToList(todo_string)[0]
-    let todo_path = s:home . todo_id
+    let todo_path = s:root . todo_id
     let axis = GetSplitDirection()
 
     " Create Todo if one does not yet exist
@@ -82,8 +82,8 @@ endfunction
 
 " Move Todo from root to archive dir
 function! ArchiveTodo(todo_id)
-    let todo_path = s:home.a:todo_id
-    let archive_path = s:home.'done/'.a:todo_id
+    let todo_path = s:root.a:todo_id
+    let archive_path = s:root.'done/'.a:todo_id
     exec "silent !"."mv "todo_path." ".archive_path
 endfunction
 
@@ -97,7 +97,7 @@ function! ArchiveTodoLi(todo_id)
     let todo_li = getline('.')
     let timestamp = GetTimeStamp()
     let done_li = timestamp.'  '.todo_li
-    let done_path = s:home.s:done_file
+    let done_path = s:root.s:done_file
     exec line('.') 'delete _'
     exec writefile([done_li], done_path, "a")
 endfunction
@@ -119,7 +119,7 @@ endfunction
 " Open Todo Index in a vertical or horizontal split
 function! OpenTodoIndex()
     let axis = GetSplitDirection()
-    exec ':'.axis.'sp '.s:home.s:index
+    exec ':'.axis.'sp '.s:root.s:index
 endfunction
 
 " Create new TodoLi
