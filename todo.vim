@@ -2,6 +2,14 @@
 
 "" Globals
 
+if !exists('g:splitbelow')
+    setlocal splitbelow
+endif
+
+if !exists('g:splitright')
+    setlocal splitright
+endif
+
 let s:root = '/home/howlin/.todo/'
 let s:index = 'todo.md'
 let s:done_file = 'done/done.md'
