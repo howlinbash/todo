@@ -18,7 +18,7 @@ if !exists('g:todo_map_prefix')
 endif
 
 " Open the Todo index
-execute 'nnoremap <buffer>' g:todo_map_prefix.'o' ':vsp '.s:home.s:index.'<CR>'
+execute 'nnoremap <buffer>' g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
 " Create new TodoLi
 execute 'nnoremap <buffer>' g:todo_map_prefix.'n' ':r! date +\%Y\%m\%d\%H\%M\%S<CR>kJA<space><space>'
 " Create or Modify a Todo
@@ -110,4 +110,10 @@ function! CompleteTodo()
         exec ":q"
         call ArchiveTodoLi(todo_id)
     endif
+endfunction
+
+" Open Todo Index in a vertical or horizontal split
+function! OpenTodoIndex()
+    let axis = GetSplitDirection()
+    exec ':'.axis.'sp '.s:home.s:index
 endfunction
