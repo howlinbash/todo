@@ -20,7 +20,7 @@ endif
 " Open the Todo index
 execute 'nnoremap <buffer>' g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
 " Create new TodoLi
-execute 'nnoremap <buffer>' g:todo_map_prefix.'n' ':r! date +\%Y\%m\%d\%H\%M\%S<CR>kJA<space><space>'
+execute 'nnoremap <buffer>' g:todo_map_prefix.'n' ':call NewTodo()<CR>'
 " Create or Modify a Todo
 execute 'nnoremap <buffer>' g:todo_map_prefix.'m' ':call ViewTodo()<CR>'
 " Archive a todo
@@ -87,11 +87,15 @@ function! ArchiveTodo(todo_id)
     exec "silent !"."mv "todo_path." ".archive_path
 endfunction
 
+function! GetTimeStamp()
+    return systemlist('date +\%Y\%m\%d\%H\%M\%S')[0]
+endfunction
+
 " Move TodoLi from Index to archive index
 function! ArchiveTodoLi(todo_id)
     call search(a:todo_id)
     let todo_li = getline('.')
-    let timestamp = systemlist('date +\%Y\%m\%d\%H\%M\%S')[0]
+    let timestamp = GetTimeStamp()
     let done_li = timestamp.'  '.todo_li
     let done_path = s:home.s:done_file
     exec line('.') 'delete _'
@@ -116,4 +120,12 @@ endfunction
 function! OpenTodoIndex()
     let axis = GetSplitDirection()
     exec ':'.axis.'sp '.s:home.s:index
+endfunction
+
+" Create new TodoLi
+function! NewTodo()
+    let timestamp = GetTimeStamp()
+    exec ':put ='.timestamp
+    exec 'normal! A   '
+    exec ':startinsert'
 endfunction
