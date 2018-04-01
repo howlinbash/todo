@@ -29,9 +29,9 @@ endif
 execute 'nnoremap <buffer>' g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
 " Create new TodoLi
 execute 'nnoremap <buffer>' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
-" Create or Modify a Todo
-execute 'nnoremap <buffer>' g:todo_map_prefix.'m' ':call ViewTodo()<CR>'
-" Archive a todo
+" Create or modify a Todo Card
+execute 'nnoremap <buffer>' g:todo_map_prefix.'m' ':call ViewTodoCard()<CR>'
+" Archive a Todo
 execute 'nnoremap <buffer>' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
 
 
@@ -58,15 +58,15 @@ function! GetSplitDirection()
     endif
 endfunction
 
-" Create new Todo with title from TodoLi
-function! NewTodo(title)
+" Create new Todo Card with title from TodoLi
+function! NewTodoCard(title)
     call append(0, '# ' . a:title)
     call append(1, '')
     exec ':startinsert'
 endfunction
 
-" Move Todo from root to archive dir
-function! ArchiveTodo(todo_id)
+" Move Todo Card from root to archive dir
+function! ArchiveTodoCard(todo_id)
     let todo_path = s:root.a:todo_id
     let archive_path = s:root.'done/'.a:todo_id
     exec "silent !"."mv "todo_path." ".archive_path
@@ -101,14 +101,14 @@ function! NewTodoLi()
     exec ':startinsert'
 endfunction
 
-" Open or create Todo in vertical or horizontal split
-function! ViewTodo()
+" Open or create Todo Card in vertical or horizontal split
+function! ViewTodoCard()
     let todo_string = getline('.')
     let todo_id = StringToList(todo_string)[0]
     let todo_path = s:root . todo_id
     let axis = GetSplitDirection()
 
-    " Create Todo if one does not yet exist
+    " Create Todo Card if one does not yet exist
     if todo_string[21] == '*'
         exec ':'.axis.'sp ' . todo_path
     else
@@ -117,22 +117,22 @@ function! ViewTodo()
             exec "normal! r*0"
             let todo_label = StringToList(getline('.'))[3]
             exec ':'.axis.'sp ' . todo_path
-            call NewTodo(todo_label)
+            call NewTodoCard(todo_label)
         catch
             echo 'ERROR: no todo found to view!'
         endtry
     endif
 endfunction
 
-" Archive Todo and TodoLi from Index or Todo
+" Archive Todo Card and TodoLi from Index or Todo Card
 function! CompleteTodo()
     if expand('%:t') == 'todo.md'
         let todo_id = StringToList(getline('.'))[0]
-        call ArchiveTodo(todo_id)
+        call ArchiveTodoCard(todo_id)
         call ArchiveTodoLi(todo_id)
     else
         let todo_id = expand('%:t')
-        call ArchiveTodo(todo_id)
+        call ArchiveTodoCard(todo_id)
         exec ":q"
         call ArchiveTodoLi(todo_id)
     endif
