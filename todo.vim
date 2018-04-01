@@ -1,19 +1,30 @@
 
 
-"" Mappings
-
-map <Leader>todo :vsp ~/.todo/todo.md<CR>|        " Open todo list in vsplit
-map <Leader>htodo :sp ~/.todo/todo.md<CR>|        " Open todo list in split
-map <Leader>id :r! date +\%Y\%m\%d\%H\%M\%S<CR>kJA<space><space>|     " create ID
-map <leader>vv :call ViewTodo('v')<CR>|          " Open todo in vsplit
-map <leader>vh :call ViewTodo('')<CR>|          " Open todo in split
-map <leader>vd :silent call CompleteTodo()<CR>|   " Complete Todo
-
-
 "" Globals
 
 let s:home = '/home/howlin/.todo/'
+let s:index = 'todo.md'
 let s:done_file = 'done/done.md'
+
+
+"" Mappings
+
+if !exists('g:todo_map_keys')
+    let g:todo_map_keys = 1
+endif
+
+if !exists('g:todo_map_prefix')
+    let g:todo_map_prefix = 't'
+endif
+
+" Open the Todo index
+execute 'nnoremap <buffer>' g:todo_map_prefix.'o' ':vsp '.s:home.s:index.'<CR>'
+" Create new TodoLi
+execute 'nnoremap <buffer>' g:todo_map_prefix.'n' ':r! date +\%Y\%m\%d\%H\%M\%S<CR>kJA<space><space>'
+" Create or Modify a Todo
+execute 'nnoremap <buffer>' g:todo_map_prefix.'m' ':call ViewTodo()<CR>'
+" Archive a todo
+execute 'nnoremap <buffer>' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
 
 
 "" Todo Functions
@@ -30,6 +41,15 @@ function! StringToList(input_string)
     return filter(stripped_list, 'v:val != ""')
 endfunction
 
+" Split screen vertically or horizontally based on current window width
+function! GetSplitDirection()
+    if winwidth(0) < 120
+        return ''
+    else
+        return 'v'
+    endif
+endfunction
+
 " Create new Todo with title from TodoLi
 function! NewTodo(title)
     call append(0, '# ' . a:title)
@@ -38,20 +58,21 @@ function! NewTodo(title)
 endfunction
 
 " Open or create Todo in vertical or horizontal split
-function! ViewTodo(axis)
+function! ViewTodo()
     let todo_string = getline('.')
     let todo_id = StringToList(todo_string)[0]
     let todo_path = s:home . todo_id
+    let axis = GetSplitDirection()
 
     " Create Todo if one does not yet exist
     if todo_string[21] == '*'
-        exec ':'.a:axis.'sp ' . todo_path
+        exec ':'.axis.'sp ' . todo_path
     else
         try
             call cursor('.', 22)
             exec "normal! r*0"
             let todo_label = StringToList(getline('.'))[3]
-            exec ':'.a:axis.'sp ' . todo_path
+            exec ':'.axis.'sp ' . todo_path
             call NewTodo(todo_label)
         catch
             echo 'ERROR: no todo found to view!'
