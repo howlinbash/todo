@@ -58,6 +58,15 @@ function! GetSplitDirection()
     endif
 endfunction
 
+" Check if passed string is a valid TodoLi
+function Valid(todo_line)
+    if a:todo_line =~# '^\d\{14}\s\{2}\w\{3}\s\{2}[* ]\s\{2}'
+        return 1
+    else 
+        return 0
+    endif
+endfunction
+
 " Create new Todo Card with title from TodoLi
 function! NewTodoCard(title)
     call append(0, '# ' . a:title)
@@ -103,24 +112,28 @@ endfunction
 
 " Open or create Todo Card in vertical or horizontal split
 function! ViewTodoCard()
-    let todo_string = getline('.')
-    let todo_id = StringToList(todo_string)[0]
-    let todo_path = s:root . todo_id
     let axis = GetSplitDirection()
+    let todo_string = getline('.')
+    let todo_list = StringToList(todo_string)
+    let todo_id = todo_list[0]
+    let todo_path = s:root . todo_id
 
-    " Create Todo Card if one does not yet exist
+    " If cursor is not under valid TodoLi, abort function
+    if !Valid(todo_string)
+        echo 'ERROR: No Todo Card found! Double check cursor position.'
+        return
+    endif
+
+    " Open Todo Card
     if todo_string[21] == '*'
         exec ':'.axis.'sp ' . todo_path
     else
-        try
-            call cursor('.', 22)
-            exec "normal! r*0"
-            let todo_label = StringToList(getline('.'))[3]
-            exec ':'.axis.'sp ' . todo_path
-            call NewTodoCard(todo_label)
-        catch
-            echo 'ERROR: no todo found to view!'
-        endtry
+        " Or create Card if one does not yet exist
+        call cursor('.', 22)
+        exec "normal! r*0"
+        let todo_label = todo_list[2]
+        exec ':'.axis.'sp ' . todo_path
+        call NewTodoCard(todo_label)
     endif
 endfunction
 
