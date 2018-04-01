@@ -1,1 +1,1 @@
-alias todo='cd ~/.todo && $EDITOR ~/.todo/todo.md'
+alias to='cd ~/.todo && $EDITOR ~/.todo/todo.md'
