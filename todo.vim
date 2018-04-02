@@ -26,13 +26,13 @@ if !exists('g:todo_map_prefix')
 endif
 
 " Open the Todo index
-execute 'nnoremap <buffer>' g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
+exec 'nnoremap <buffer>' g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
 " Create new TodoLi
-execute 'nnoremap <buffer>' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
+exec 'nnoremap <buffer>' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
 " Create or modify a Todo Card
-execute 'nnoremap <buffer>' g:todo_map_prefix.'m' ':call ViewTodoCard()<CR>'
+exec 'nnoremap <buffer>' g:todo_map_prefix.'m' ':call ViewTodoCard()<CR>'
 " Archive a Todo
-execute 'nnoremap <buffer>' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
+exec 'nnoremap <buffer>' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
 
 
 "" Todo Functions
