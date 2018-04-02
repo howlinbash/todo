@@ -139,7 +139,7 @@ endfunction
 
 " Archive Todo Card and TodoLi from Index or Todo Card
 function! CompleteTodo()
-    if expand('%:t') == 'todo.md'
+    if expand('%:t') == s:index
         let todo_id = StringToList(getline('.'))[0]
         call ArchiveTodoCard(todo_id)
         call ArchiveTodoLi(todo_id)
