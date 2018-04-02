@@ -10,10 +10,11 @@ if !exists('g:splitright')
     setlocal splitright
 endif
 
+let s:suffix = '.todo'
 let s:root = '/home/howlin/.todo/'
-let s:index = 'index.todo'
+let s:index = 'index'.s:suffix
 let s:archive = s:root.'archive/'
-let s:archive_index = s:archive.'archive_index.todo'
+let s:archive_index = s:archive.'archive_index'.s:suffix
 
 
 "" Mappings
@@ -26,7 +27,7 @@ if !exists('g:todo_map_prefix')
     let g:todo_map_prefix = 't'
 endif
 
-autocmd BufRead,BufNewFile *.todo set filetype=todo
+exec 'autocmd BufRead,BufNewFile *'.s:suffix.' set filetype=todo'
 
 " Open the Todo index
 exec 'nnoremap <leader>'.g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
@@ -116,7 +117,7 @@ function! ViewTodoCard()
     let todo_string = getline('.')
     let todo_list = StringToList(todo_string)
     let todo_id = todo_list[0]
-    let todo_path = s:root . todo_id . '.todo'
+    let todo_path = s:root . todo_id . s:suffix
 
     " If cursor is not under valid TodoLi, abort function
     if !Valid(todo_string)
@@ -141,7 +142,7 @@ endfunction
 function! CompleteTodo()
     if expand('%:t') == s:index
         let todo_id = StringToList(getline('.'))[0]
-        let todo_card = todo_id.'.todo'
+        let todo_card = todo_id.s:suffix
         call ArchiveTodoCard(todo_card)
         call ArchiveTodoLi(todo_id)
     else
