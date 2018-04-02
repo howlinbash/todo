@@ -25,14 +25,16 @@ if !exists('g:todo_map_prefix')
     let g:todo_map_prefix = 't'
 endif
 
+autocmd BufRead,BufNewFile *.todo set filetype=todo
+
 " Open the Todo index
-exec 'nnoremap <buffer>' g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
+exec 'nnoremap <leader>'.g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
 " Create new TodoLi
-exec 'nnoremap <buffer>' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
+exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
 " Create or modify a Todo Card
-exec 'nnoremap <buffer>' g:todo_map_prefix.'m' ':call ViewTodoCard()<CR>'
+exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'m' ':call ViewTodoCard()<CR>'
 " Archive a Todo
-exec 'nnoremap <buffer>' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
+exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
 
 
 "" Todo Functions
