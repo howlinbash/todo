@@ -11,8 +11,8 @@ if !exists('g:splitright')
 endif
 
 let s:root = '/home/howlin/.todo/'
-let s:index = 'todo.md'
-let s:done_file = 'done/done.md'
+let s:index = 'index.todo'
+let s:done_file = 'archive/archive_index.todo'
 
 
 "" Mappings
@@ -116,7 +116,7 @@ function! ViewTodoCard()
     let todo_string = getline('.')
     let todo_list = StringToList(todo_string)
     let todo_id = todo_list[0]
-    let todo_path = s:root . todo_id
+    let todo_path = s:root . todo_id . '.todo'
 
     " If cursor is not under valid TodoLi, abort function
     if !Valid(todo_string)
