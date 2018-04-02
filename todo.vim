@@ -12,7 +12,8 @@ endif
 
 let s:root = '/home/howlin/.todo/'
 let s:index = 'index.todo'
-let s:done_file = 'archive/archive_index.todo'
+let s:archive = s:root.'archive/'
+let s:archive_index = s:archive.'archive_index.todo'
 
 
 "" Mappings
@@ -76,15 +77,13 @@ function! NewTodoCard(title)
     exec ':startinsert'
 endfunction
 
-" Move Todo Card from root to archive dir
-function! ArchiveTodoCard(todo_id)
-    let todo_path = s:root.a:todo_id
-    let archive_path = s:root.'done/'.a:todo_id
-    exec "silent !"."mv "todo_path." ".archive_path
-endfunction
-
 function! GetTimeStamp()
     return systemlist('date +\%Y\%m\%d\%H\%M\%S')[0]
+endfunction
+
+" Move Todo Card from root to archive dir
+function! ArchiveTodoCard(todo_card)
+    exec 'silent !'.'mv 's:root.a:todo_card.' '.s:archive.a:todo_card
 endfunction
 
 " Move TodoLi from Index to archive index
@@ -93,9 +92,8 @@ function! ArchiveTodoLi(todo_id)
     let todo_li = getline('.')
     let timestamp = GetTimeStamp()
     let done_li = timestamp.'  '.todo_li
-    let done_path = s:root.s:done_file
     exec line('.') 'delete _'
-    exec writefile([done_li], done_path, "a")
+    exec writefile([done_li], s:archive_index, "a")
 endfunction
 
 " Open Todo Index in a vertical or horizontal split
@@ -143,11 +141,13 @@ endfunction
 function! CompleteTodo()
     if expand('%:t') == s:index
         let todo_id = StringToList(getline('.'))[0]
-        call ArchiveTodoCard(todo_id)
+        let todo_card = todo_id.'.todo'
+        call ArchiveTodoCard(todo_card)
         call ArchiveTodoLi(todo_id)
     else
-        let todo_id = expand('%:t')
-        call ArchiveTodoCard(todo_id)
+        let todo_card = expand('%:t')
+        let todo_id = strpart(todo_card, 0, 14)
+        call ArchiveTodoCard(todo_card)
         exec ":q"
         call ArchiveTodoLi(todo_id)
     endif
