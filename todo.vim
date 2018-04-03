@@ -71,13 +71,6 @@ function Valid(todo_line)
     endif
 endfunction
 
-" Create new Todo Card with title from TodoLi
-function! NewTodoCard(title)
-    call append(0, '# ' . a:title)
-    call append(1, '')
-    exec ':startinsert'
-endfunction
-
 function! GetTimeStamp()
     return systemlist('date +\%Y\%m\%d\%H\%M\%S')[0]
 endfunction
@@ -101,6 +94,18 @@ endfunction
 function! OpenTodoIndex()
     let axis = GetSplitDirection()
     exec ':'.axis.'sp '.s:root.s:index
+endfunction
+
+" Create new Todo Card with title from TodoLi
+function! NewTodoCard(title)
+    let underline = ''
+    while len(underline) < len(a:title)
+        let underline = underline.'='
+    endwhile
+    call append(0, a:title)
+    call append(1, underline)
+    call append(2, '')
+    exec ':startinsert'
 endfunction
 
 " Create new TodoLi
