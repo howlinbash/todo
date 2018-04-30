@@ -10,10 +10,10 @@ if !exists('g:splitright')
     setlocal splitright
 endif
 
-let s:suffix = '.todo'
 let s:root = '/home/howlin/.todo/'
-let s:index = 'index'.s:suffix
+let s:suffix = '.todo'
 let s:archive = s:root.'archive/'
+let s:cards = s:root.'cards/'
 let s:archive_index = s:archive.'archive_index'.s:suffix
 
 
@@ -29,8 +29,6 @@ endif
 
 exec 'autocmd BufRead,BufNewFile *'.s:suffix.' set filetype=todo'
 
-" Open the Todo index
-exec 'nnoremap <leader>'.g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
 " Create new TodoLi
 exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
 " Create or modify a Todo Card
@@ -77,7 +75,7 @@ endfunction
 
 " Move Todo Card from root to archive dir
 function! ArchiveTodoCard(todo_card)
-    exec 'silent !'.'mv 's:root.a:todo_card.' '.s:archive.a:todo_card
+    exec 'silent !'.'mv 's:cards.a:todo_card.' '.s:archive.a:todo_card
 endfunction
 
 " Move TodoLi from Index to archive index
@@ -88,12 +86,6 @@ function! ArchiveTodoLi(todo_id)
     let done_li = timestamp.'  '.todo_li
     exec line('.') 'delete _'
     exec writefile([done_li], s:archive_index, "a")
-endfunction
-
-" Open Todo Index in a vertical or horizontal split
-function! OpenTodoIndex()
-    let axis = GetSplitDirection()
-    exec ':'.axis.'sp '.s:root.s:index
 endfunction
 
 " Create new Todo Card with title from TodoLi
@@ -122,7 +114,7 @@ function! ViewTodoCard()
     let todo_string = getline('.')
     let todo_list = StringToList(todo_string)
     let todo_id = todo_list[0]
-    let todo_path = s:root . todo_id . s:suffix
+    let todo_path =  s:cards . todo_id . s:suffix
 
     " If cursor is not under valid TodoLi, abort function
     if !Valid(todo_string)
@@ -145,16 +137,8 @@ endfunction
 
 " Archive Todo Card and TodoLi from Index or Todo Card
 function! CompleteTodo()
-    if expand('%:t') == s:index
-        let todo_id = StringToList(getline('.'))[0]
-        let todo_card = todo_id.s:suffix
-        call ArchiveTodoCard(todo_card)
-        call ArchiveTodoLi(todo_id)
-    else
-        let todo_card = expand('%:t')
-        let todo_id = strpart(todo_card, 0, 14)
-        call ArchiveTodoCard(todo_card)
-        exec ":q"
-        call ArchiveTodoLi(todo_id)
-    endif
+    let todo_id = StringToList(getline('.'))[0]
+    let todo_card = todo_id.s:suffix
+    call ArchiveTodoCard(todo_card)
+    call ArchiveTodoLi(todo_id)
 endfunction
