@@ -116,7 +116,7 @@ function! ViewTodoCard()
     let axis = GetSplitDirection()
     let todo_string = getline('.')
     let todo_list = StringToList(todo_string)
-    let todo_id = todo_list[0]
+    let todo_id = todo_list[0][0:13]
     let todo_path =  s:cards . todo_id . s:suffix
 
     " If cursor is not under valid TodoLi, abort function
@@ -140,7 +140,7 @@ endfunction
 
 " Archive Todo Card and TodoLi from Index or Todo Card
 function! CompleteTodo()
-    let todo_id = StringToList(getline('.'))[0]
+    let todo_id = StringToList(getline('.'))[0][0:13]
     let todo_card = todo_id.s:suffix
     call ArchiveTodoCard(todo_card)
     call ArchiveTodoLi(todo_id)
