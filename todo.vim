@@ -13,6 +13,7 @@ endif
 let s:root = '/home/howlin/.todo/'
 let s:suffix = '.todo'
 let s:archive = s:root.'archive/'
+let s:boards = s:root.'boards/'
 let s:cards = s:root.'cards/'
 let s:archive_index = s:archive.'archive_index'.s:suffix
 
@@ -32,7 +33,9 @@ exec 'autocmd BufRead,BufNewFile *'.s:suffix.' set filetype=todo'
 " Create new TodoLi
 exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
 " Create or modify a Todo Card
-exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'m' ':call ViewTodoCard()<CR>'
+exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'j' ':call ViewTodoCard()<CR>'
+" Open Todo Board
+exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'o' ':call OpenBoard()<CR>'
 " Archive a Todo
 exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
 
@@ -141,4 +144,11 @@ function! CompleteTodo()
     let todo_card = todo_id.s:suffix
     call ArchiveTodoCard(todo_card)
     call ArchiveTodoLi(todo_id)
+endfunction
+
+function! OpenBoard()
+    let axis = GetSplitDirection()
+    normal! 0/.todoByW
+    let board = expand('<cWORD>')
+    exec ':'.axis.'sp ' . s:boards . board
 endfunction
