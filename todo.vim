@@ -62,7 +62,7 @@ endfunction
 
 " Check if passed string is a valid TodoLi
 function Valid(todo_line)
-    if a:todo_line =~# '^\d\{14}\s\{2}\w\{3}\s\{2}[* ]\s\{2}'
+    if a:todo_line =~# '^\d\{14}.\s\{2}'
         return 1
     else 
         return 0
@@ -104,7 +104,7 @@ endfunction
 function! NewTodoLi()
     let timestamp = GetTimeStamp()
     exec ':put ='.timestamp
-    exec 'normal! A   '
+    exec 'normal! A    '
     exec ':startinsert'
 endfunction
 
@@ -123,13 +123,13 @@ function! ViewTodoCard()
     endif
 
     " Open Todo Card
-    if todo_string[21] == '*'
+    if todo_string[14] == '*'
         exec ':'.axis.'sp ' . todo_path
     else
         " Or create Card if one does not yet exist
-        call cursor('.', 22)
+        call cursor('.', 15)
         exec "normal! r*0"
-        let todo_label = todo_list[2]
+        let todo_label = todo_list[1]
         exec ':'.axis.'sp ' . todo_path
         call NewTodoCard(todo_label)
     endif
