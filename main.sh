@@ -2,6 +2,7 @@
 
 root="$HOME/.todo"
 board="$root/boards/$1.todo"
+index="$root/boards/index.todo"
 alias=$2
 bashrc="$HOME/.bash_aliases"
 vimrc="$HOME/.vim/vimrc.d/mappings.vim"
@@ -26,6 +27,10 @@ function check_todo_is_uniq() {
    done
 }
 
+if ! [ "$1" ]; then
+    $EDITOR $index
+    exit 1
+fi
 
 if [ "$1" == "list" ]; then
     print_aliases
@@ -44,6 +49,7 @@ else
     echo "alias $1='\$EDITOR $board'" >> $bashrc
     echo "nmap <Leader>$1 :call DynamicSplit('$board')<CR>" >> $vimrc
 fi
+echo "* $1.todo" >> $index
 
 len=${#1} 
 i=1
