@@ -32,10 +32,8 @@ exec 'autocmd BufRead,BufNewFile *'.s:suffix.' set filetype=todo'
 
 " Create new TodoLi
 exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
-" Create or modify a Todo Card
-exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'j' ':call ViewTodoCard()<CR>'
-" Open Todo Board
-exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'o' ':call OpenBoard()<CR>'
+" Open Todo Board or Card
+exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'o' ':call Open()<CR>'
 " Archive a Todo
 exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
 
@@ -60,15 +58,6 @@ function! GetSplitDirection()
         return ''
     else
         return 'v'
-    endif
-endfunction
-
-" Check if passed string is a valid TodoLi
-function Valid(todo_line)
-    if a:todo_line =~# '^\d\{14}.\s\{2}'
-        return 1
-    else 
-        return 0
     endif
 endfunction
 
@@ -112,21 +101,14 @@ function! NewTodoLi()
 endfunction
 
 " Open or create Todo Card in vertical or horizontal split
-function! ViewTodoCard()
+function! ViewTodoCard(todo_string)
     let axis = GetSplitDirection()
-    let todo_string = getline('.')
-    let todo_list = StringToList(todo_string)
+    let todo_list = StringToList(a:todo_string)
     let todo_id = todo_list[0][0:13]
     let todo_path =  s:cards . todo_id . s:suffix
 
-    " If cursor is not under valid TodoLi, abort function
-    if !Valid(todo_string)
-        echo 'ERROR: No Todo Card found! Double check cursor position.'
-        return
-    endif
-
     " Open Todo Card
-    if todo_string[14] == '*'
+    if a:todo_string[14] == '*'
         exec ':'.axis.'sp ' . todo_path
     else
         " Or create Card if one does not yet exist
@@ -146,9 +128,23 @@ function! CompleteTodo()
     call ArchiveTodoLi(todo_id)
 endfunction
 
+" Open Todo Board
 function! OpenBoard()
     let axis = GetSplitDirection()
     normal! 0/.todoByW
     let board = expand('<cWORD>')
     exec ':'.axis.'sp ' . s:boards . board
+endfunction
+
+" Open Todo Board or Card
+function! Open()
+    let current_line = getline('.')
+    if match(current_line, '^\d\{14}.\s\{2}') > -1
+        call ViewTodoCard(current_line)
+    elseif match(current_line, '\.todo') > -1
+        call OpenBoard()
+    else
+        echo 'ERROR: No Todo found! Double check cursor position.'
+        return
+    endif
 endfunction
