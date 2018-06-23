@@ -86,9 +86,10 @@ function! NewTodoCard(title)
     while len(underline) < len(a:title)
         let underline = underline.'='
     endwhile
-    call append(0, a:title)
-    call append(1, underline)
-    call append(2, '')
+    call append(0, '')
+    call append(1, a:title)
+    call append(2, underline)
+    call append(3, '')
     exec ':startinsert'
 endfunction
 
