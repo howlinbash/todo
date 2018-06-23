@@ -10,10 +10,11 @@ if !exists('g:splitright')
     setlocal splitright
 endif
 
-let s:suffix = '.todo'
 let s:root = '/home/howlin/.todo/'
-let s:index = 'index'.s:suffix
+let s:suffix = '.todo'
 let s:archive = s:root.'archive/'
+let s:boards = s:root.'boards/'
+let s:cards = s:root.'cards/'
 let s:archive_index = s:archive.'archive_index'.s:suffix
 
 
@@ -29,12 +30,10 @@ endif
 
 exec 'autocmd BufRead,BufNewFile *'.s:suffix.' set filetype=todo'
 
-" Open the Todo index
-exec 'nnoremap <leader>'.g:todo_map_prefix.'o' ':call OpenTodoIndex()<CR>'
 " Create new TodoLi
 exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'n' ':call NewTodoLi()<CR>'
-" Create or modify a Todo Card
-exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'m' ':call ViewTodoCard()<CR>'
+" Open Todo Board or Card
+exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'o' ':call Open()<CR>'
 " Archive a Todo
 exec 'autocmd FileType todo nnoremap' g:todo_map_prefix.'a' ':silent call CompleteTodo()<CR>'
 
@@ -62,22 +61,13 @@ function! GetSplitDirection()
     endif
 endfunction
 
-" Check if passed string is a valid TodoLi
-function Valid(todo_line)
-    if a:todo_line =~# '^\d\{14}\s\{2}\w\{3}\s\{2}[* ]\s\{2}'
-        return 1
-    else 
-        return 0
-    endif
-endfunction
-
 function! GetTimeStamp()
     return systemlist('date +\%Y\%m\%d\%H\%M\%S')[0]
 endfunction
 
 " Move Todo Card from root to archive dir
 function! ArchiveTodoCard(todo_card)
-    exec 'silent !'.'mv 's:root.a:todo_card.' '.s:archive.a:todo_card
+    exec 'silent !'.'mv 's:cards.a:todo_card.' '.s:archive.a:todo_card
 endfunction
 
 " Move TodoLi from Index to archive index
@@ -90,21 +80,16 @@ function! ArchiveTodoLi(todo_id)
     exec writefile([done_li], s:archive_index, "a")
 endfunction
 
-" Open Todo Index in a vertical or horizontal split
-function! OpenTodoIndex()
-    let axis = GetSplitDirection()
-    exec ':'.axis.'sp '.s:root.s:index
-endfunction
-
 " Create new Todo Card with title from TodoLi
 function! NewTodoCard(title)
     let underline = ''
     while len(underline) < len(a:title)
         let underline = underline.'='
     endwhile
-    call append(0, a:title)
-    call append(1, underline)
-    call append(2, '')
+    call append(0, '')
+    call append(1, a:title)
+    call append(2, underline)
+    call append(3, '')
     exec ':startinsert'
 endfunction
 
@@ -112,32 +97,25 @@ endfunction
 function! NewTodoLi()
     let timestamp = GetTimeStamp()
     exec ':put ='.timestamp
-    exec 'normal! A   '
+    exec 'normal! A    '
     exec ':startinsert'
 endfunction
 
 " Open or create Todo Card in vertical or horizontal split
-function! ViewTodoCard()
+function! ViewTodoCard(todo_string)
     let axis = GetSplitDirection()
-    let todo_string = getline('.')
-    let todo_list = StringToList(todo_string)
-    let todo_id = todo_list[0]
-    let todo_path = s:root . todo_id . s:suffix
-
-    " If cursor is not under valid TodoLi, abort function
-    if !Valid(todo_string)
-        echo 'ERROR: No Todo Card found! Double check cursor position.'
-        return
-    endif
+    let todo_list = StringToList(a:todo_string)
+    let todo_id = todo_list[0][0:13]
+    let todo_path =  s:cards . todo_id . s:suffix
 
     " Open Todo Card
-    if todo_string[21] == '*'
+    if a:todo_string[14] == '*'
         exec ':'.axis.'sp ' . todo_path
     else
         " Or create Card if one does not yet exist
-        call cursor('.', 22)
+        call cursor('.', 15)
         exec "normal! r*0"
-        let todo_label = todo_list[2]
+        let todo_label = todo_list[1]
         exec ':'.axis.'sp ' . todo_path
         call NewTodoCard(todo_label)
     endif
@@ -145,16 +123,29 @@ endfunction
 
 " Archive Todo Card and TodoLi from Index or Todo Card
 function! CompleteTodo()
-    if expand('%:t') == s:index
-        let todo_id = StringToList(getline('.'))[0]
-        let todo_card = todo_id.s:suffix
-        call ArchiveTodoCard(todo_card)
-        call ArchiveTodoLi(todo_id)
+    let todo_id = StringToList(getline('.'))[0][0:13]
+    let todo_card = todo_id.s:suffix
+    call ArchiveTodoCard(todo_card)
+    call ArchiveTodoLi(todo_id)
+endfunction
+
+" Open Todo Board
+function! OpenBoard()
+    let axis = GetSplitDirection()
+    normal! 0/.todoByW
+    let board = expand('<cWORD>')
+    exec ':'.axis.'sp ' . s:boards . board
+endfunction
+
+" Open Todo Board or Card
+function! Open()
+    let current_line = getline('.')
+    if match(current_line, '^\d\{14}.\s\{2}') > -1
+        call ViewTodoCard(current_line)
+    elseif match(current_line, '\.todo') > -1
+        call OpenBoard()
     else
-        let todo_card = expand('%:t')
-        let todo_id = strpart(todo_card, 0, 14)
-        call ArchiveTodoCard(todo_card)
-        exec ":q"
-        call ArchiveTodoLi(todo_id)
+        echo 'ERROR: No Todo found! Double check cursor position.'
+        return
     endif
 endfunction
