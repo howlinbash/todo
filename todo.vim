@@ -78,6 +78,7 @@ function! ArchiveTodoLi(todo_id)
     let done_li = timestamp.'  '.todo_li
     exec line('.') 'delete _'
     exec writefile([done_li], s:archive_index, "a")
+    exec "normal \<C-O>"
 endfunction
 
 " Create new Todo Card with title from TodoLi
