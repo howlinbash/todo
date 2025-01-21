@@ -10,7 +10,7 @@ if !exists('g:splitright')
     setlocal splitright
 endif
 
-let s:root = '/home/howlin/.todo/'
+let s:root = '/home/' . expand('$USER') . '/.todo/'
 let s:suffix = '.todo'
 let s:archive = s:root.'archive/'
 let s:boards = s:root.'boards/'
