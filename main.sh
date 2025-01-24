@@ -29,12 +29,12 @@ function check_todo_is_uniq() {
 
 if ! [ "$1" ]; then
     $EDITOR $index
-    exit 1
+    exit 0
 fi
 
 if [ "$1" == "list" ]; then
     print_aliases
-    exit 1
+    exit 0
 fi
 
 check_todo_is_uniq  $1
